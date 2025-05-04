@@ -57,12 +57,13 @@ class FavoriteServiceImplTest {
 
     @Test
     void testGetAllFavorites() {
-        when(favoriteRepository.findAll()).thenReturn(List.of(favorite));
+        when(shopUserService.getCurrentUser()).thenReturn(user);
+        when(favoriteRepository.findAllByUser(user)).thenReturn(List.of(favorite));
 
         List<Favorite> result = favoriteService.getAll();
 
         assertThat(result).hasSize(1);
-        verify(favoriteRepository, times(1)).findAll();
+        verify(favoriteRepository, times(1)).findAllByUser(user);
     }
 
     @Test
@@ -79,6 +80,7 @@ class FavoriteServiceImplTest {
 
     @Test
     void testGetFavoriteById_Found() {
+        when(shopUserService.getCurrentUser()).thenReturn(user);
         when(favoriteRepository.findById(3L)).thenReturn(Optional.of(favorite));
 
         Favorite result = favoriteService.getById(3L);
