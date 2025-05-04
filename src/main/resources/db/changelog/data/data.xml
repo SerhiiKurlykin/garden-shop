@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="konstantin">
+        <sql>
+            INSERT INTO users( name, email, phone_number, password_hash, role) values ('test','test','2548796','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_ADMIN');
+            INSERT INTO users( name, email, phone_number, password_hash, role) values ('test2','test2','2548796','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_ADMIN');
+            INSERT INTO users( name, email, phone_number, password_hash, role) values ('test3','test3','26988723','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_CLIENT');
+            INSERT INTO categories( name) values ('Fertilizer');
+            INSERT INTO categories( name) values ('Protective products and septic tanks');
+            INSERT INTO categories( name) values ('Planting material');
+            INSERT INTO categories( name) values ('Tools and equipment');
+            INSERT INTO categories( name) values ('Pots and planters');
+            INSERT INTO products( name, description, price, category_id, image_url,discount_price,created_at,updated_at) values ('banana','ban', 10, 1,'http/CLIENT', 2,CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('orange','or', 207.98, 1,'http/Admin',CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('one','or', 204.98, 2,'http/Admin',CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('two','or', 201.98, 3,'http/Admin',CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('three','or', 20.98, 1,'http/Admin',CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('four','or', 20.978, 3,'http/Admin',CURRENT_TIMESTAMP,null);
+            INSERT INTO products( name, description, price, category_id, image_url,created_at,updated_at) values ('fourteen','or', 20.978, 3,'http/Admin',CURRENT_TIMESTAMP,null);
+
+        </sql>
+    </changeSet>
+    <changeSet id="2" author="anton">
+        <sql>
+            INSERT INTO favorites(user_id, product_id) values (1, 2);
+            INSERT INTO favorites(user_id, product_id) values (2, 1);
+            INSERT INTO favorites(user_id, product_id) values (1, 3);
+         </sql>
+    </changeSet>
+
+    <changeSet id="3" author="kostya">
+        <sql>
+            INSERT INTO carts (user_id) values (1);
+            INSERT INTO carts (user_id) values (2);
+
+            INSERT INTO cart_items (cart_id, product_id, quantity) values (1, 1, 12);
+            INSERT INTO cart_items (cart_id, product_id, quantity) values (2, 2, 15);
+        </sql>
+    </changeSet>
+
+    <changeSet id="4" author="kostya">
+        <sql>
+            INSERT INTO orders (user_id, status) values (1, 'CANCELLED');
+            INSERT INTO orders (user_id, status) values (2, 'CREATED');
+
+            INSERT INTO order_items (order_id, product_id) values (1,1);
+            INSERT INTO order_items (order_id, product_id) values (2,2);
+        </sql>
+    </changeSet>
+</databaseChangeLog>
