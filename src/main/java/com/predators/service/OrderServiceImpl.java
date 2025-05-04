@@ -91,8 +91,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getAllByStatus(OrderStatus status) {
-        return orderRepository.findAllByStatus(status);
+        return orderRepository.findAllByStatus(status); // Возвращает пустой список
     }
+
 
     @Override
     public List<Order> getHistory() {
