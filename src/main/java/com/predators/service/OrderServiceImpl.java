@@ -94,6 +94,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAllByStatus(status);
     }
 
+
     @Override
     public List<Order> getHistory() {
         ShopUser currentUser = shopUserService.getCurrentUser();
