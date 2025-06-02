@@ -25,7 +25,7 @@ class ProductControllerTest {
 
     @BeforeEach
     public void init() {
-        RestAssured.baseURI = "http://localhost";
+        RestAssured.baseURI = "http://localhost:" + port;
         token = given()
                 .contentType("application/json")
                 .body("{\"email\":\"test\", \"password\":\"12345\"}")
@@ -40,7 +40,6 @@ class ProductControllerTest {
     @Test
     void testGetAll() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("v1/products")
@@ -51,7 +50,6 @@ class ProductControllerTest {
     @Test
     void testGetById() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("v1/products/1")
@@ -64,13 +62,12 @@ class ProductControllerTest {
         String product = """
                 {
                   "name": "one",
-                  "description": "one description",
-                  "price": "20.89",
+                  "description": "description",
+                  "price": "20.25",
                   "categoryId": "1",
-                  "image": "http/"
+                  "imageUrl": "http/"
                 }""";
         given()
-                .port(port)
                 .contentType(ContentType.JSON)
                 .body(product)
                 .header("Authorization", "Bearer " + token)
@@ -91,7 +88,6 @@ class ProductControllerTest {
                   "image": "http/"
                 }""";
         given()
-                .port(port)
                 .contentType(ContentType.JSON)
                 .body(product)
                 .header("Authorization", "Bearer " + token)
@@ -101,17 +97,14 @@ class ProductControllerTest {
                 .statusCode(201);
     }
 
-
     @Test
     @Transactional
     void testDelete() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .delete("v1/products/2")
                 .then()
                 .statusCode(200);
     }
-
 }

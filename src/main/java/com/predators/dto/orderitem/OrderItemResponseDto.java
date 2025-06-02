@@ -1,4 +1,12 @@
 package com.predators.dto.orderitem;
 
-public class OrderItemResponseDto {
+import lombok.Builder;
+
+import java.math.BigDecimal;
+
+@Builder
+public record OrderItemResponseDto(Long id,
+                                   Long productId,
+                                   int quantity,
+                                   BigDecimal priceAtPurchase) {
 }

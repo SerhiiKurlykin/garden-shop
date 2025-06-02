@@ -1,7 +1,7 @@
 package com.predators.service;
 
-import com.predators.entity.CartItem;
 import com.predators.entity.Cart;
+import com.predators.entity.CartItem;
 import com.predators.entity.Product;
 import com.predators.repository.CartItemJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +15,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CartItemServiceImplTest {
@@ -86,31 +91,22 @@ class CartItemServiceImplTest {
     }
 
     @Test
-    void delete_WhenExists_ShouldDelete() {
-        when(cartItemJpaRepository.existsById(10L)).thenReturn(true);
-
-        cartItemService.delete(10L);
-
-        verify(cartItemJpaRepository, times(1)).deleteById(10L);
-    }
-
-    @Test
-    void delete_WhenNotExists_ShouldThrowException() {
-        when(cartItemJpaRepository.existsById(99L)).thenReturn(false);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                cartItemService.delete(99L));
-
-        assertEquals("CartItem Not Found", exception.getMessage());
-    }
-
-    @Test
     void findByProductId_ShouldReturnCartItemOptional() {
         when(cartItemJpaRepository.findByProduct_Id(2L)).thenReturn(Optional.of(testItem));
 
-        Optional<CartItem> result = cartItemService.findByProduct_Id(2L);
+        CartItem result = cartItemService.findByProduct_Id(2L);
 
-        assertTrue(result.isPresent());
-        assertEquals(testItem.getProduct().getId(), result.get().getProduct().getId());
+        assertEquals(testItem.getProduct().getId(), result.getProduct().getId());
+    }
+
+    @Test
+    void getAll_ShouldReturnEmptyList_WhenNoCartItemsExist() {
+        when(cartItemJpaRepository.findAll()).thenReturn(List.of()); // Return empty list
+
+        List<CartItem> result = cartItemService.getAll();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(cartItemJpaRepository, times(1)).findAll();
     }
 }

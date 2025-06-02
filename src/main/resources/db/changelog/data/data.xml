@@ -9,6 +9,7 @@
             INSERT INTO users( name, email, phone_number, password_hash, role) values ('test','test','2548796','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_ADMIN');
             INSERT INTO users( name, email, phone_number, password_hash, role) values ('test2','test2','2548796','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_ADMIN');
             INSERT INTO users( name, email, phone_number, password_hash, role) values ('test3','test3','26988723','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_CLIENT');
+            INSERT INTO users( name, email, phone_number, password_hash, role) values ('test4','someemail@gamil.com','+4926988723','$2a$10$c/mM34wFCiCnuxmNKcvFhu/sq/ByiL.hWGo1VafcolmxNBbV78tr2','ROLE_CLIENT');
             INSERT INTO categories( name) values ('Fertilizer');
             INSERT INTO categories( name) values ('Protective products and septic tanks');
             INSERT INTO categories( name) values ('Planting material');
@@ -44,11 +45,13 @@
 
     <changeSet id="4" author="kostya">
         <sql>
-            INSERT INTO orders (user_id, status) values (1, 'CANCELLED');
-            INSERT INTO orders (user_id, status) values (2, 'CREATED');
+            INSERT INTO orders (user_id, status, updated_at) values (1, 'COMPLETED', '2025-05-01 10:22:03.862983');
+            INSERT INTO orders (user_id, status, updated_at) values (2, 'COMPLETED', '2025-04-07 10:22:03.862983');
 
-            INSERT INTO order_items (order_id, product_id) values (1,1);
-            INSERT INTO order_items (order_id, product_id) values (2,2);
+            INSERT INTO order_items (order_id, product_id, price_at_purchase) values (1,1,10);
+            INSERT INTO order_items (order_id, product_id, price_at_purchase) values (2,2,20);
         </sql>
     </changeSet>
+
+
 </databaseChangeLog>

@@ -1,6 +1,6 @@
 package com.predators.service;
 
-import com.predators.dto.user.UserRequestDto;
+import com.predators.dto.user.UserRequestUpdateDto;
 import com.predators.entity.ShopUser;
 import com.predators.entity.enums.Role;
 import com.predators.exception.PermissionDeniedException;
@@ -8,6 +8,7 @@ import com.predators.exception.UserAlreadyExistsException;
 import com.predators.exception.UserNotFoundException;
 import com.predators.repository.UserJpaRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ShopUserServiceImpl implements ShopUserService {
 
     private final UserJpaRepository userRepository;
-
-    public ShopUserServiceImpl(UserJpaRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public List<ShopUser> getAll() {
@@ -36,7 +34,6 @@ public class ShopUserServiceImpl implements ShopUserService {
         if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("User with such email exists");
         }
-
         return userRepository.save(shopUser);
     }
 
@@ -47,6 +44,7 @@ public class ShopUserServiceImpl implements ShopUserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         ShopUser currentUser = getCurrentUser();
         if (currentUser.getId().equals(id) || currentUser.getRole().equals(Role.ROLE_ADMIN)) {
@@ -77,7 +75,7 @@ public class ShopUserServiceImpl implements ShopUserService {
 
     @Override
     @Transactional
-    public ShopUser update(UserRequestDto userDto) {
+    public ShopUser update(UserRequestUpdateDto userDto) {
         ShopUser currentUser = getCurrentUser();
         if (userDto.name() != null) {
             currentUser.setName(userDto.name());
@@ -88,10 +86,9 @@ public class ShopUserServiceImpl implements ShopUserService {
             }
             currentUser.setEmail(userDto.email());
         }
-        if (userDto.phone() != null) {
-            currentUser.setPhoneNumber(userDto.phone());
+        if (userDto.phoneNumber() != null) {
+            currentUser.setPhoneNumber(userDto.phoneNumber());
         }
         return userRepository.save(currentUser);
     }
-
 }

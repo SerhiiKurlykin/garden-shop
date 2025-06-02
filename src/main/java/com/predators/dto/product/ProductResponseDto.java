@@ -11,7 +11,7 @@ public record ProductResponseDto(Long id,
                                  String description,
                                  BigDecimal price,
                                  Long categoryId,
-                                 String image,
+                                 String imageUrl,
                                  BigDecimal discountPrice,
                                  Timestamp createdAt,
                                  Timestamp updatedAt) {

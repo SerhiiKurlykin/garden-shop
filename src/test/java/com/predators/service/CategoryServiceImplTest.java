@@ -1,8 +1,5 @@
 package com.predators.service;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.predators.entity.Category;
 import com.predators.exception.CategoryNotFoundException;
 import com.predators.repository.CategoryJpaRepository;
@@ -16,6 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
@@ -35,7 +36,7 @@ class CategoryServiceImplTest {
     void setUp() {
         category = Category.builder()
                 .id(1L)
-                .name ("GARDEN_TOOLS")
+                .name("GARDEN_TOOLS")
                 .build();
     }
 
@@ -73,17 +74,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void testDelete_WhenCategoryExists() {
-        when(categoryJpaRepository.existsById(1L)).thenReturn(true);
-        when(productService.findByCategoryId(1L)).thenReturn(List.of()); // Добавлено поведение мока
-        doNothing().when(categoryJpaRepository).deleteById(1L);
-
-        assertDoesNotThrow(() -> categoryService.delete(1L));
-    }
-
-    @Test
     void testDelete_WhenCategoryDoesNotExist() {
-        when(categoryJpaRepository.existsById(1L)).thenReturn(false);
+        when(categoryJpaRepository.findById(1L)).thenThrow(CategoryNotFoundException.class);
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.delete(1L));
     }

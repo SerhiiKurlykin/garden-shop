@@ -1,6 +1,6 @@
 package com.predators.service;
 
-import com.predators.dto.user.UserRequestDto;
+import com.predators.dto.user.UserRequestUpdateDto;
 import com.predators.entity.ShopUser;
 
 import java.util.List;
@@ -19,5 +19,5 @@ public interface ShopUserService {
 
     ShopUser getCurrentUser();
 
-    ShopUser update(UserRequestDto userDto);
+    ShopUser update(UserRequestUpdateDto userDto);
 }

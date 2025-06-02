@@ -1,8 +1,5 @@
 package com.predators.service;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
-
 import com.predators.entity.OrderItem;
 import com.predators.repository.OrderItemRepository;
 import org.junit.jupiter.api.Test;
@@ -12,6 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Автоматически активирует Mockito
 class OrderItemServiceImplTest {
