@@ -2,11 +2,11 @@ package com.predators.service;
 
 import com.predators.entity.Favorite;
 
-import java.util.List;
+import java.util.Set;
 
 public interface FavoriteService {
 
-    List<Favorite> getAll();
+    Set<Favorite> getAll();
 
     Favorite create(Long productId);
 

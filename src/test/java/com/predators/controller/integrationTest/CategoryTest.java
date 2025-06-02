@@ -22,7 +22,7 @@ public class CategoryTest {
 
     @BeforeEach
     public void init() {
-        RestAssured.baseURI = "http://localhost";
+        RestAssured.baseURI = "http://localhost:" + port;
         token = given()
                 .contentType("application/json")
                 .body("{\"email\":\"test\", \"password\":\"12345\"}")
@@ -37,7 +37,6 @@ public class CategoryTest {
     @Test
     void testGetAll() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("v1/categories")
@@ -49,7 +48,6 @@ public class CategoryTest {
     @Test
     void testGetById() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("v1/categories/1")
@@ -60,7 +58,6 @@ public class CategoryTest {
     @Test
     void testCreate() {
         given()
-                .port(port)
                 .contentType("application/json")
                 .body("{\"name\":\"Garden Tools\"}")
                 .header("Authorization", "Bearer " + token)
@@ -73,7 +70,6 @@ public class CategoryTest {
     @Test
     void testDelete() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .delete("v1/categories/1")

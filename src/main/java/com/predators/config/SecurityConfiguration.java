@@ -34,6 +34,11 @@ public class SecurityConfiguration {
                         request
                                 .requestMatchers(HttpMethod.POST, "v1/users/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "v1/users/login").permitAll()
+                                .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html"
+                                ).permitAll()
                                 .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session ->

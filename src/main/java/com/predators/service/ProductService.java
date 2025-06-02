@@ -1,14 +1,18 @@
 package com.predators.service;
 
+import com.predators.dto.product.ProductCountDto;
 import com.predators.dto.product.ProductFilterDto;
 import com.predators.dto.product.ProductRequestDto;
 import com.predators.entity.Category;
 import com.predators.entity.Product;
+import com.predators.entity.enums.OrderStatus;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 public interface ProductService {
 
@@ -31,4 +35,8 @@ public interface ProductService {
     Product setDiscount(Long id, BigDecimal discount);
 
     Product getDayProduct();
+
+    List<ProductCountDto> findTopProductsAndCountsByOrderStatus(OrderStatus status, int limit);
+
+    Set<Product> findByStatusAndUpdatedAtBeforeThreshold(OrderStatus status, Timestamp data);
 }

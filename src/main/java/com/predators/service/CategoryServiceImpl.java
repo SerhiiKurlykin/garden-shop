@@ -1,7 +1,7 @@
 package com.predators.service;
 
 import com.predators.entity.Category;
-import com.predators.entity.Product;
+import com.predators.exception.CategoryAlreadyExistsException;
 import com.predators.exception.CategoryNotFoundException;
 import com.predators.repository.CategoryJpaRepository;
 import jakarta.transaction.Transactional;
@@ -29,16 +29,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category create(Category category) {
+        if (repository.findByName(category.getName()).isPresent()) {
+            throw new CategoryAlreadyExistsException("Category already exists with name: " + category.getName());
+        }
         return repository.save(category);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new CategoryNotFoundException("Category not found with id: " + id);
-        }
-        repository.deleteById(id);
+        Category category = getById(id);
+        repository.deleteById(category.getId());
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.Map;
 
 @Service
 public class JwtServiceImpl implements JwtService {
+
     private final SecretKey secretKey;
 
     public JwtServiceImpl(@Value("${jwttoken.sign.secret.key}") String jjwtSecretKey) {

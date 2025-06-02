@@ -22,7 +22,7 @@ class CartControllerTest {
 
     @BeforeEach
     public void init() {
-        RestAssured.baseURI = "http://localhost";
+        RestAssured.baseURI = "http://localhost:" + port;
         token = given()
                 .contentType("application/json")
                 .body("{\"email\":\"test\", \"password\":\"12345\"}")
@@ -35,9 +35,8 @@ class CartControllerTest {
     }
 
     @Test
-    void getAllProducts() {
+    void getAllCartItems() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("v1/cart")
@@ -48,7 +47,6 @@ class CartControllerTest {
     @Test
     void addProduct() {
         given()
-                .port(port)
                 .contentType("application/json")
                 .body("{\n" +
                         "    \"productId\": 1,\n" +
@@ -64,8 +62,8 @@ class CartControllerTest {
     @Test
     void deleteProduct() {
         given()
-                .port(port)
                 .header("Authorization", "Bearer " + token)
+                .port(port)
                 .when()
                 .delete("v1/cart/1")
                 .then()

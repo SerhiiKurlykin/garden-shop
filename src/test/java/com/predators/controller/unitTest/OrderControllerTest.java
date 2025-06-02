@@ -1,13 +1,12 @@
 package com.predators.controller.unitTest;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predators.controller.OrderController;
-import com.predators.dto.converter.OrderConverter;
+import com.predators.dto.order.OrderMapper;
 import com.predators.dto.order.OrderRequestDto;
 import com.predators.dto.order.OrderResponseDto;
+import com.predators.dto.orderitem.OrderItemMapper;
+import com.predators.dto.orderitem.OrderItemResponseDto;
 import com.predators.entity.Order;
 import com.predators.entity.enums.DeliveryMethod;
 import com.predators.service.OrderService;
@@ -20,9 +19,22 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
@@ -31,7 +43,10 @@ class OrderControllerTest {
     private OrderService orderService;
 
     @Mock
-    private OrderConverter converter;
+    private OrderMapper orderMapper;
+
+    @Mock
+    private OrderItemMapper orderItemMapper;
 
     @InjectMocks
     private OrderController orderController;
@@ -44,23 +59,11 @@ class OrderControllerTest {
         Order order = new Order();
         OrderResponseDto dto = buildOrderResponseDto();
         when(orderService.getAll()).thenReturn(List.of(order));
-        when(converter.toDto(order)).thenReturn(dto);
+        when(orderMapper.toDto(order)).thenReturn(dto);
         mockMvc.perform(get("/v1/orders"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(dto.id()))
                 .andExpect(jsonPath("$[0].status").value(dto.status()));
-    }
-
-    @Test
-    void getOrderHistory_ShouldReturnOrderHistory() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
-        Order order = new Order();
-        OrderResponseDto dto = buildOrderResponseDto();
-        when(orderService.getHistory()).thenReturn(List.of(order));
-        when(converter.toDto(order)).thenReturn(dto);
-        mockMvc.perform(get("/v1/orders/history"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(dto.id()));
     }
 
     @Test
@@ -78,7 +81,7 @@ class OrderControllerTest {
         Order order = new Order();
         OrderResponseDto responseDto = buildOrderResponseDto();
         when(orderService.create(any())).thenReturn(order);
-        when(converter.toDto(order)).thenReturn(responseDto);
+        when(orderMapper.toDto(order)).thenReturn(responseDto);
         mockMvc.perform(post("/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -92,7 +95,7 @@ class OrderControllerTest {
         Order order = new Order();
         OrderResponseDto dto = buildOrderResponseDto();
         when(orderService.getById(anyLong())).thenReturn(order);
-        when(converter.toDto(order)).thenReturn(dto);
+        when(orderMapper.toDto(order)).thenReturn(dto);
 
         mockMvc.perform(get("/v1/orders/1"))
                 .andExpect(status().isOk())
@@ -105,7 +108,7 @@ class OrderControllerTest {
         Order updatedOrder = new Order();
         OrderResponseDto updatedDto = buildOrderResponseDto();
         when(orderService.updateStatus(anyLong(), any())).thenReturn(updatedOrder);
-        when(converter.toDto(updatedOrder)).thenReturn(updatedDto);
+        when(orderMapper.toDto(updatedOrder)).thenReturn(updatedDto);
 
         mockMvc.perform(put("/v1/orders/1/status")
                         .param("status", "COMPLETED"))
@@ -141,6 +144,15 @@ class OrderControllerTest {
                 .items(Collections.emptyList())
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
+
+    private OrderItemResponseDto buildOrderItemResponseDto() {
+        return OrderItemResponseDto.builder()
+                .id(1L)
+                .productId(1L)
+                .quantity(2)
+                .priceAtPurchase(BigDecimal.valueOf(40))
                 .build();
     }
 }

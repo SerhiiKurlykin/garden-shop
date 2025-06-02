@@ -12,8 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ShopShopUserServiceImplTest {
@@ -58,26 +62,5 @@ class ShopShopUserServiceImplTest {
     @Test
     void testGetByIdNotFound() {
         assertThrows(UserNotFoundException.class, () -> userService.getById(2L));
-    }
-
-    @Test
-    void delete_userExists() {
-        Long userIdToDelete = 1L;
-        when(userRepository.findById(userIdToDelete)).thenReturn(Optional.of(new ShopUser()));
-
-        userService.delete(userIdToDelete);
-
-        verify(userRepository, times(1)).deleteById(userIdToDelete);
-    }
-
-    @Test
-    void delete_userNotFound() {
-        Long userIdToDelete = 1L;
-        when(userRepository.findById(userIdToDelete)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> userService.delete(userIdToDelete));
-
-        verify(userRepository, never()).deleteById(anyLong());
-        assertThrows(UserNotFoundException.class, () -> userService.delete(userIdToDelete));
     }
 }

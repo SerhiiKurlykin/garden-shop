@@ -3,12 +3,13 @@ package com.predators.service;
 import com.predators.entity.Favorite;
 import com.predators.entity.Product;
 import com.predators.entity.ShopUser;
+import com.predators.exception.FavoriteAlreadyExistsException;
 import com.predators.exception.FavoriteNotFoundException;
 import com.predators.repository.FavoriteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,45 +22,42 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final ShopUserService shopUserService;
 
     @Override
-    public List<Favorite> getAll() {
+    public Set<Favorite> getAll() {
         ShopUser currentUser = shopUserService.getCurrentUser();
-
         return favoriteRepository.findAllByUser(currentUser);
     }
 
     @Override
     public Favorite create(Long productId) {
         ShopUser currentUser = shopUserService.getCurrentUser();
-        Product byId = productService.getById(productId);
-        List<Favorite> favorites = currentUser.getFavorites();
+        Product product = productService.getById(productId);
+        Set<Favorite> favorites = currentUser.getFavorites();
+        Favorite existedFavorite = favoriteRepository.findByUserAndProduct(currentUser, product).orElse(null);
 
-        for (Favorite favorite : favorites) {
-            Long favoriteProductId = favorite.getProduct().getId();
-            if (favoriteProductId.equals(productId)) {
-                return favoriteRepository.save(favorite);
-            }
+        if (favorites.contains(existedFavorite)) {
+            throw new FavoriteAlreadyExistsException("Favorite with such data already exists");
         }
 
-        Favorite favorite = Favorite.builder()
+        existedFavorite = Favorite.builder()
                 .user(currentUser)
-                .product(byId)
+                .product(product)
                 .build();
-        return favoriteRepository.save(favorite);
+
+        favorites.add(existedFavorite);
+
+        return favoriteRepository.save(existedFavorite);
     }
 
     @Override
     public Favorite getById(Long id) {
         ShopUser currentUser = shopUserService.getCurrentUser();
-        Favorite favorite = favoriteRepository.findById(id)
+        return favoriteRepository.findByIdAndUser(id, currentUser)
                 .orElseThrow(() -> new FavoriteNotFoundException("Favorite not found with id: " + id));
-        if (favorite.getUser().getId().equals(currentUser.getId())) {
-            return favorite;
-        }
-        throw new FavoriteNotFoundException("Favorite not found with id: " + id);
     }
 
     @Override
     public void delete(Long id) {
-        favoriteRepository.deleteById(id);
+        Favorite favorite = getById(id);
+        favoriteRepository.deleteById(favorite.getId());
     }
 }

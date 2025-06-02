@@ -1,12 +1,14 @@
 package com.predators.service;
 
+import com.predators.entity.Cart;
 import com.predators.entity.CartItem;
+import com.predators.entity.Product;
+import com.predators.exception.CartItemNotFoundException;
 import com.predators.repository.CartItemJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public CartItem getById(Long id) {
         return cartItemJpaRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("CartItem Not Found"));
+                orElseThrow(() -> new CartItemNotFoundException("CartItem Not Found"));
     }
 
     @Override
@@ -32,14 +34,26 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void delete(Long id) {
-        if (!cartItemJpaRepository.existsById(id)) {
-            throw new RuntimeException("CartItem Not Found");
-        }
-        cartItemJpaRepository.deleteById(id);
+        CartItem cartItem = getById(id);
+        cartItemJpaRepository.deleteById(cartItem.getId());
     }
 
     @Override
-    public Optional<CartItem> findByProduct_Id(Long productId) {
-        return cartItemJpaRepository.findByProduct_Id(productId);
+    public CartItem findByProduct_Id(Long productId) {
+        return cartItemJpaRepository.findByProduct_Id(productId).orElseThrow(
+                () -> new CartItemNotFoundException("Cart Item with product id " + productId + " not found.")
+        );
+    }
+
+    @Override
+    public CartItem findCartItemByProductAndCart(Product product, Cart cart) {
+        return cartItemJpaRepository.findCartItemByProductAndCart(product, cart)
+                .orElse(null);
+    }
+
+    @Override
+    public CartItem findByProductIdAndCartId(Long productId, Long cartId) {
+        return cartItemJpaRepository.findCartItemByProduct_IdAndCart_Id(productId, cartId)
+                .orElseThrow(() -> new CartItemNotFoundException("No cartItem with such ids"));
     }
 }

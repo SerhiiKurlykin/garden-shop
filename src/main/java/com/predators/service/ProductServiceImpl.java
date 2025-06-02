@@ -1,13 +1,18 @@
 package com.predators.service;
 
+import com.predators.dto.product.ProductCountDto;
 import com.predators.dto.product.ProductFilterDto;
 import com.predators.dto.product.ProductRequestDto;
 import com.predators.entity.Category;
 import com.predators.entity.Product;
+import com.predators.entity.enums.OrderStatus;
+import com.predators.exception.DiscountGraterThanPriceException;
 import com.predators.exception.DiscountNotFoundException;
 import com.predators.exception.ProductNotFoundException;
 import com.predators.repository.ProductJpaRepository;
-import com.predators.specification.ProductSpecification;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,15 +24,14 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductJpaRepository repository;
+
     private final CategoryService categoryService;
 
     @Override
@@ -60,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
-        Specification<Product> spec = ProductSpecification.withFilters(filter);
+        Specification<Product> spec = withFilters(filter);
         return repository.findAll(spec, pageable);
     }
 
@@ -78,7 +82,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        Product product = getById(id);
+        repository.deleteById(product.getId());
     }
 
     @Override
@@ -93,8 +98,8 @@ public class ProductServiceImpl implements ProductService {
         if (product.price() != null) {
             productByDB.setPrice(product.price());
         }
-        if (product.image() != null) {
-            productByDB.setImageUrl(product.image());
+        if (product.imageUrl() != null) {
+            productByDB.setImageUrl(product.imageUrl());
         }
         if (product.categoryId() != null) {
             Category categoryById = categoryService.getById(product.categoryId());
@@ -119,31 +124,74 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product setDiscount(Long id, BigDecimal discount) {
         Product product = getById(id);
-        product.setDiscountPrice(discount);
-        return create(product);
+
+        if (product.getPrice().compareTo(discount) > 0) {
+            product.setDiscountPrice(discount);
+            product.setUpdatedAt(Timestamp.from(Instant.now()));
+            return create(product);
+        }
+
+        throw new DiscountGraterThanPriceException("Discount can't be grater than Price!");
     }
 
     @Override
     public Product getDayProduct() {
-        List<Product> productWithDiscount = repository.findProductWithDiscount();
-        if (productWithDiscount.isEmpty()) {
-           throw  new DiscountNotFoundException("Product with discount is not found");
+        List<Product> productRepo = repository.findAllByDiscountPriceIsNotNull();
+
+        Comparator<Product> comparator = Comparator.comparing(Product::getDiscountPrice).reversed();
+        PriorityQueue<Product> priorityQueue = new PriorityQueue<>(comparator);
+        priorityQueue.addAll(productRepo);
+
+        if (priorityQueue.isEmpty()) {
+            throw new DiscountNotFoundException("Product with discount is not found");
         }
-        BigDecimal greatestDiscount = new BigDecimal(0);
-        for (Product product : productWithDiscount) {
-            if (product.getDiscountPrice().compareTo(greatestDiscount) > 0) {
-                greatestDiscount = product.getDiscountPrice();
+        return priorityQueue.peek();
+    }
+
+    private Specification<Product> withFilters(ProductFilterDto filter) {
+
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (filter != null) {
+
+                if (filter.minPrice() != null) {
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("price"), filter.minPrice()));
+                }
+
+                if (filter.maxPrice() != null) {
+                    predicates.add(cb.lessThanOrEqualTo(root.get("price"), filter.maxPrice()));
+                }
+
+                if (filter.categoryId() != null) {
+                    Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
+                    predicates.add(cb.equal(categoryJoin.get("id"), filter.categoryId()));
+                }
+
+                if (Boolean.TRUE.equals(filter.discountPrice())) {
+                    predicates.add(cb.isNotNull(root.get("discountPrice")));
+                    predicates.add(cb.lessThan(root.get("discountPrice"), root.get("price")));
+                } else if (Boolean.FALSE.equals(filter.discountPrice())) {
+                    predicates.add(
+                            cb.or(
+                                    cb.isNull(root.get("discountPrice")),
+                                    cb.greaterThanOrEqualTo(root.get("discountPrice"), root.get("price"))
+                            )
+                    );
+                }
             }
-        }
-        List<Product> discountedProducts = new ArrayList<>();
-        for (Product product : productWithDiscount) {
-            if (product.getDiscountPrice() == greatestDiscount) {
-                discountedProducts.add(product);
-            }
-        }
-        Random random = new Random();
-        int index = random.nextInt(0,discountedProducts.size());
-        return discountedProducts.get(index);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    @Override
+    public List<ProductCountDto> findTopProductsAndCountsByOrderStatus(OrderStatus status, int limit) {
+        return repository.findTopProductsAndCountsByOrderStatus(status, limit);
+    }
+
+    @Override
+    public Set<Product> findByStatusAndUpdatedAtBeforeThreshold(OrderStatus status, Timestamp data) {
+        return repository.findProductsFromOrdersByStatusAndUpdatedAtBefore(status, data);
     }
 }
 

@@ -4,21 +4,20 @@ import com.predators.entity.ShopUser;
 import com.predators.security.model.SignInRequest;
 import com.predators.security.model.SignInResponse;
 import com.predators.service.ShopUserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private ShopUserService shopUserService;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtService jwtService;
+    private final ShopUserService shopUserService;
+
+    private final JwtService jwtService;
 
     @Override
     public SignInResponse authenticate(SignInRequest request) {
